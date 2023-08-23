@@ -17,9 +17,8 @@ impl FOTString {
 
         Ok(if utf {
             let mut buf = vec![0u16; len as usize];
-            let b = unsafe {
-                slice::from_raw_parts_mut(buf.as_mut_ptr() as *mut u8, buf.len() * 2)
-            };
+            let b =
+                unsafe { slice::from_raw_parts_mut(buf.as_mut_ptr() as *mut u8, buf.len() * 2) };
             data.read_exact(b)?;
 
             FOTString::Utf16(
@@ -30,9 +29,9 @@ impl FOTString {
             let mut buf = vec![0; len as usize];
             data.read_exact(&mut buf)?;
             FOTString::Ascii(
-                String::from_utf8(buf).map_err(|e| std::io::Error::new(ErrorKind::InvalidData, e))?,
+                String::from_utf8(buf)
+                    .map_err(|e| std::io::Error::new(ErrorKind::InvalidData, e))?,
             )
         })
     }
 }
-

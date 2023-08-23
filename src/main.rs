@@ -1,3 +1,5 @@
+#![feature(pointer_byte_offsets)]
+
 mod decode;
 
 use inflate::inflate_bytes_zlib;
@@ -26,8 +28,8 @@ fn main() {
                 fs::write(&format!("world_{i}.bin"), &out_buf).expect("out_buf");
                 let mut data = out_buf.as_slice();
                 decode::primitive::FOTString::read(&mut data).unwrap(); // HEADER
-                dbg!(decode::sections::SDG::read(&mut data).unwrap());
-                dbg!(decode::sections::SDG::read(&mut data).unwrap());
+                decode::sections::SDG::read(&mut data).unwrap();
+                decode::sections::SSG::read(&mut data).unwrap();
             }
             Err(e) => eprintln!("{}", e),
         };
