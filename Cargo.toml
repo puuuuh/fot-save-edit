@@ -7,3 +7,7 @@ edition = "2021"
 
 [dependencies]
 inflate = "0.4.5"
+memmem = { version = "0.1.1" }
+byteorder = { version = "1.4.3" }
+widestring = "1.0.2"
+thiserror = "1.0.39"
