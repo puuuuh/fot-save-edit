@@ -6,6 +6,7 @@ use inflate::inflate_bytes_zlib;
 use memmem::Searcher;
 use std::env;
 use std::fs;
+use std::process::exit;
 
 const WORLD_HEADER: &[u8] = b"<world>";
 
@@ -15,23 +16,8 @@ fn main() {
 
     let save_buf = fs::read(save_path).unwrap();
     let searcher = memmem::TwoWaySearcher::new(b"<world>");
-    let next_section_search = memmem::TwoWaySearcher::new(b"<SSG>");
 
     let mut start = 0;
-    while let Some(i) = searcher.search_in(&save_buf[start..]) {
-        let i = start + i;
-        start = i + WORLD_HEADER.len();
-
-        println!("Found offset 0x{:x}", i);
-        match inflate_bytes_zlib(&save_buf[i + 0x13..]) {
-            Ok(out_buf) => {
-                fs::write(&format!("world_{i}.bin"), &out_buf).expect("out_buf");
-                let mut data = out_buf.as_slice();
-                decode::primitive::FOTString::read(&mut data).unwrap(); // HEADER
-                decode::sections::SDG::read(&mut data).unwrap();
-                decode::sections::SSG::read(&mut data).unwrap();
-            }
-            Err(e) => eprintln!("{}", e),
-        };
-    }
+    let mut cursor = save_buf.as_slice();
+    decode::saveh::Saveh::read(&mut cursor).unwrap();
 }

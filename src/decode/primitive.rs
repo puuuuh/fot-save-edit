@@ -3,6 +3,7 @@ use std::io::{ErrorKind, Read};
 use std::ops::Shr;
 use std::slice;
 
+// TODO: Win1251
 #[derive(Debug)]
 pub enum FOTString {
     Ascii(String),
