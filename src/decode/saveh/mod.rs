@@ -72,7 +72,7 @@ impl Saveh {
             strings: (0..5).map(|_| {
                 FOTString::read(&mut data)
             }).collect::<Result<_, _>>()?,
-            tmp: (0..7).map(|_| {
+            tmp: (0..8).map(|_| {
                 Test::read(&mut data)
             }).collect::<Result<_, _>>()?,
             ints: read_primitive_vec!(data, u32, 6)

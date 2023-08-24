@@ -1,13 +1,12 @@
 #![allow(clippy::size_of_in_element_count)]
 #![feature(pointer_byte_offsets)]
+use std::io::Read;
+use byteorder::{LittleEndian, ReadBytesExt};
 
 mod decode;
-
-use inflate::inflate_bytes_zlib;
 use memmem::Searcher;
 use std::env;
 use std::fs;
-use std::process::exit;
 
 const WORLD_HEADER: &[u8] = b"<world>";
 
@@ -20,5 +19,7 @@ fn main() {
 
     let mut start = 0;
     let mut cursor = save_buf.as_slice();
+    let start = cursor.as_ptr();
     decode::saveh::Saveh::read(&mut cursor).unwrap();
+    dbg!(unsafe { cursor.as_ptr().byte_offset_from(start) });
 }

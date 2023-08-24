@@ -36,7 +36,7 @@ macro_rules! read_primitive_vec {
 macro_rules! dbg_str {
     ($data: ident, $s: literal) => {{
         let mut buf = [0; $s];
-        $data.read_exact(&mut buf)?;
+        $data.read_exact(&mut buf);
         dbg!(String::from_utf8_lossy(&buf))
     }};
 }
