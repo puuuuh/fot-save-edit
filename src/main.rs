@@ -1,3 +1,4 @@
+#![allow(clippy::size_of_in_element_count)]
 #![feature(pointer_byte_offsets)]
 
 mod decode;
