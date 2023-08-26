@@ -1,17 +1,27 @@
 use byteorder::{LittleEndian, ReadBytesExt};
-use std::io::{ErrorKind, Read};
+use std::io::{BufRead, ErrorKind, Read};
 use std::ops::Shr;
 use std::slice;
 use crate::read_primitive_vec;
 
 // TODO: Win1251
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum FOTString {
     Ascii(String),
     Utf16(widestring::Utf16String),
 }
 
 impl FOTString {
+    pub fn serialized_length(&self) -> usize {
+        (match self {
+            FOTString::Ascii(data) => {
+                data.len()
+            }
+            FOTString::Utf16(data) => {
+                data.len() * 2
+            }
+        }) + 4
+    }
     pub fn read(mut data: impl Read) -> Result<FOTString, std::io::Error> {
         let header = data.read_u32::<LittleEndian>()?;
         let utf = header.shr(31) == 1u32;

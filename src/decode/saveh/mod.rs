@@ -3,8 +3,9 @@ use byteorder::{LittleEndian, ReadBytesExt};
 use crate::{assert_section, read_primitive_vec, skip};
 use crate::decode::error::ParseError;
 use crate::decode::primitive::FOTString;
+use crate::decode::stream::Stream;
 
-const SAVEH_HEADER: &str = "<saveh>";
+const HEADER: &str = "<saveh>\0";
 
 #[derive(Debug)]
 pub struct Saveh {
@@ -61,11 +62,10 @@ impl Test {
 }
 
 impl Saveh {
-    pub fn read(mut data: impl Read) -> Result<Saveh, ParseError> {
-        assert_section!(data, SAVEH_HEADER);
-        skip!(data, 3);
+    pub fn read(mut data: &mut Stream) -> Result<Saveh, ParseError> {
+        assert_section!(data, HEADER);
+        data.read_cstr()?;
         let some_ver = data.read_i8()?;
-
 
         Ok(Saveh {
             version: some_ver,

@@ -5,6 +5,7 @@ macro_rules! assert_section {
         $data.read_exact(&mut buf)?;
         if buf != $s.as_bytes() {
             return Err(ParseError::InvalidSection(
+                $s,
                 String::from_utf8_lossy(&buf).into_owned(),
             ));
         }
@@ -22,7 +23,6 @@ macro_rules! skip {
 #[macro_export]
 macro_rules! read_primitive_vec {
     ($data: ident, $t: ty, $len: expr) => {
-
         {
             let mut res: Vec<$t> = vec![0; $len as usize];
             let b =
@@ -34,8 +34,8 @@ macro_rules! read_primitive_vec {
 }
 #[macro_export]
 macro_rules! dbg_str {
-    ($data: ident, $s: literal) => {{
-        let mut buf = [0; $s];
+    ($data: ident, $s: expr) => {{
+        let mut buf = vec![0; $s as usize];
         $data.read_exact(&mut buf);
         dbg!(String::from_utf8_lossy(&buf))
     }};

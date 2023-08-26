@@ -4,5 +4,5 @@ pub enum ParseError {
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
     #[error("Invalid section")]
-    InvalidSection(String),
+    InvalidSection(&'static str, String),
 }

@@ -5,6 +5,7 @@ use crate::decode::error::ParseError;
 use crate::decode::primitive::FOTString;
 use crate::decode::sections::entity_file::EntityFile;
 use crate::decode::sections::esh::ESH;
+use crate::decode::stream::Stream;
 
 const SSG_HEADER: &str = "<SSG>";
 
@@ -22,16 +23,16 @@ pub struct SSGEntry {
 }
 
 impl SSG {
-    pub fn read(mut data: impl Read) -> Result<Self, ParseError> {
+    pub fn read(mut data: &mut Stream) -> Result<Self, ParseError> {
         assert_section!(data, SSG_HEADER);
         skip!(data, 0x17);
 
         let entity_file = EntityFile::read(&mut data)?;
 
         let esh_count = data.read_i16::<LittleEndian>()?;
-        let tmp = data.read_u32::<LittleEndian>()?;
+        let tmp = data.read_u32()?;
         let entries = (0..esh_count - 1).map(|_| -> Result<_, ParseError> {
-            let l = data.read_i32::<LittleEndian>()?;
+            let l = data.read_i32()?;
             let flag = data.read_i16::<LittleEndian>()?;
             let data = if flag == -1 {
                 None
