@@ -38,7 +38,7 @@ impl<'a> Stream<'a> {
     }
 
     pub fn read_string(&mut self) -> Result<FOTString, ParseError> {
-        Ok(FOTString::read(&mut self.cursor)?)
+        FOTString::read(&mut self.cursor)
     }
 
 

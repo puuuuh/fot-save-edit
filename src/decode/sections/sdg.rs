@@ -4,10 +4,10 @@ use crate::{assert_section, skip};
 use crate::decode::error::ParseError;
 use crate::decode::primitive::FOTString;
 use crate::decode::sections::entity_file::EntityFile;
-use crate::decode::sections::esh::ESH;
+use crate::decode::sections::esh::Esh;
 use crate::decode::stream::Stream;
 
-const SSG_HEADER: &str = "<SSG>";
+const HEADER: &str = "<SSG>\0";
 
 #[derive(Debug)]
 pub struct SSG {
@@ -19,13 +19,13 @@ pub struct SSG {
 pub struct SSGEntry {
     pub l: i32,
     pub f: i16,
-    pub data: Option<ESH>,
+    pub data: Option<Esh>,
 }
 
 impl SSG {
     pub fn read(mut data: &mut Stream) -> Result<Self, ParseError> {
-        assert_section!(data, SSG_HEADER);
-        skip!(data, 0x17);
+        assert_section!(data, HEADER);
+        skip!(data, 0x16);
 
         let entity_file = EntityFile::read(&mut data)?;
 
@@ -37,10 +37,9 @@ impl SSG {
             let data = if flag == -1 {
                 None
             } else {
-                Some(ESH::read(&mut data)?)
+                Some(Esh::read(data)?)
             };
             Ok(SSGEntry {
-
                 l,
                 f: flag,
                 data

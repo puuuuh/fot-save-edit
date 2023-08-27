@@ -2,11 +2,12 @@
 #![feature(pointer_byte_offsets)]
 use std::io::Read;
 use byteorder::{LittleEndian, ReadBytesExt};
-
 mod decode;
 use memmem::Searcher;
 use std::env;
 use std::fs;
+use crate::decode::sections::campaign_save::CampaignSave;
+use crate::decode::sections::saveh::Saveh;
 
 
 fn main() {
@@ -17,7 +18,6 @@ fn main() {
 
     let cursor = save_buf.as_slice();
     let mut cursor = decode::stream::Stream::new(cursor);
-    decode::saveh::Saveh::read(&mut cursor).unwrap();
-    decode::campaign_save::CampaignSave::read(&mut cursor).unwrap();
-    unsafe { save_buf.len() - cursor.pos() };
+    Saveh::read(&mut cursor).unwrap();
+    CampaignSave::read(&mut cursor).unwrap();
 }

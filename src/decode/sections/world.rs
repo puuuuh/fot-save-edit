@@ -20,11 +20,12 @@ impl World {
     pub fn read(data: &mut Stream) -> Result<Self, ParseError> {
         assert_section!(data, HEADER);
         data.read_cstr()?;
-        let uncompressed_length = data.read_u32()?;
-        data.read_u32()?;
+
+        let _uncompressed_length = data.read_u32()?;
+        data.read_u32()?; // second len
+
         let world_data = inflate::inflate_bytes_zlib(data.read_slice(data.len() - data.pos())?)
             .map_err(|e| std::io::Error::new(ErrorKind::InvalidData, e))?;
-        assert_eq!(uncompressed_length as usize, world_data.len());
 
         let mut stream = Stream::new(&world_data);
         let path = FOTString::read(&mut stream).unwrap(); // HEADER

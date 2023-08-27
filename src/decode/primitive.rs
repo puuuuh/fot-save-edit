@@ -2,6 +2,7 @@ use byteorder::{LittleEndian, ReadBytesExt};
 use std::io::{BufRead, ErrorKind, Read};
 use std::ops::Shr;
 use std::slice;
+use crate::decode::error::ParseError;
 use crate::read_primitive_vec;
 
 // TODO: Win1251
@@ -22,7 +23,7 @@ impl FOTString {
             }
         }) + 4
     }
-    pub fn read(mut data: impl Read) -> Result<FOTString, std::io::Error> {
+    pub fn read(mut data: impl Read) -> Result<FOTString, ParseError> {
         let header = data.read_u32::<LittleEndian>()?;
         let utf = header.shr(31) == 1u32;
         let len = header & 0x7FFFFFFF;
