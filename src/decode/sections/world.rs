@@ -2,9 +2,10 @@ use crate::decode::error::ParseError;
 use crate::decode::stream::Stream;
 use crate::{assert_section};
 use std::io::{ErrorKind, Read};
+use flate2::FlushDecompress;
 use crate::decode::primitive::FOTString;
 use crate::decode::sections::sdg::SSG;
-use crate::decode::sections::ssg::SDG;
+use crate::decode::sections::sgd::SDG;
 
 const HEADER: &str = "<world>\0";
 
@@ -21,11 +22,15 @@ impl World {
         assert_section!(data, HEADER);
         data.read_cstr()?;
 
-        let _uncompressed_length = data.read_u32()?;
+        let uncompressed_length = data.read_u32()? as usize;
         data.read_u32()?; // second len
 
-        let world_data = inflate::inflate_bytes_zlib(data.read_slice(data.len() - data.pos())?)
-            .map_err(|e| std::io::Error::new(ErrorKind::InvalidData, e))?;
+        let mut result = vec![0; uncompressed_length];
+        let mut decomp = flate2::Decompress::new(true);
+        decomp.decompress(data.clone().read_slice(data.len() - data.pos())?, &mut result, FlushDecompress::Finish).unwrap();
+        data.skip(decomp.total_in() as _)?;
+
+        let world_data = result;
 
         let mut stream = Stream::new(&world_data);
         let path = FOTString::read(&mut stream).unwrap(); // HEADER

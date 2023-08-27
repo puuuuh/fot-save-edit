@@ -1,6 +1,5 @@
 use std::io::Read;
-use byteorder::{LittleEndian, ReadBytesExt};
-use crate::{assert_section, skip};
+use crate::{assert_section};
 use crate::decode::error::ParseError;
 use crate::decode::primitive::FOTString;
 use crate::decode::stream::Stream;
@@ -16,7 +15,8 @@ pub struct SDG {
 impl SDG {
     pub fn read(mut data: &mut Stream) -> Result<Self, ParseError> {
         assert_section!(data, HEADER);
-        data.skip(0x4A)?;
+        data.read_cstr()?;
+        data.skip(0x48)?;
 
         let cnt = data.read_u32()?;
         let names = (0..cnt)

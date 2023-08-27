@@ -1,9 +1,6 @@
 #![allow(clippy::size_of_in_element_count)]
 #![feature(pointer_byte_offsets)]
-use std::io::Read;
-use byteorder::{LittleEndian, ReadBytesExt};
 mod decode;
-use memmem::Searcher;
 use std::env;
 use std::fs;
 use crate::decode::sections::campaign_save::CampaignSave;
@@ -20,4 +17,5 @@ fn main() {
     let mut cursor = decode::stream::Stream::new(cursor);
     Saveh::read(&mut cursor).unwrap();
     CampaignSave::read(&mut cursor).unwrap();
+
 }

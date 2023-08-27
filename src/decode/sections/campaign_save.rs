@@ -42,17 +42,14 @@ impl CampaignSave {
             let name = (data.clone()).read_cstr()?; // kinda lookahead
             match name.to_bytes() {
                 b"<saveh>" => {
-                    let mut substream = data.clone();
-                    let saveh = Saveh::read(&mut substream)?;
-                    let world = World::read(&mut substream)?;
+                    let saveh = Saveh::read(&mut data)?;
+                    let world = World::read(&mut data)?;
                     // TODO: Parse tail too
                     res.push(CampaignWorld {
                         file_name,
                         saveh,
                         world,
                     });
-
-                    data.skip(len as usize)?;
                 }
                 b"<campaign>" => {
                     data.skip(0x22C5)?;
