@@ -16,6 +16,6 @@ fn main() {
     let cursor = save_buf.as_slice();
     let mut cursor = decode::stream::Stream::new(cursor);
     Saveh::read(&mut cursor).unwrap();
-    CampaignSave::read(&mut cursor).unwrap();
+    dbg!(CampaignSave::read(&mut cursor).unwrap());
 
 }

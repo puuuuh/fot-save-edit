@@ -1,5 +1,5 @@
 pub mod sgd;
-pub mod sdg;
+pub mod ssg;
 pub mod entity_file;
 pub mod esh;
 pub mod world;

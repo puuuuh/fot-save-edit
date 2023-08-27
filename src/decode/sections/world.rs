@@ -2,18 +2,20 @@ use crate::decode::error::ParseError;
 use crate::decode::stream::Stream;
 use crate::{assert_section};
 use std::io::{ErrorKind, Read};
+use derive_debug::Dbg;
 use flate2::FlushDecompress;
 use crate::decode::primitive::FOTString;
-use crate::decode::sections::sdg::SSG;
+use crate::decode::sections::ssg::SSG;
 use crate::decode::sections::sgd::SDG;
 
 const HEADER: &str = "<world>\0";
 
-#[derive(Debug)]
+#[derive(Dbg)]
 pub struct World {
     pub path: FOTString,
     pub sdg: SDG,
     pub ssg: SSG,
+    #[dbg(formatter = "crate::decode::format::fmt_blob")]
     pub tail: Vec<u8>,
 }
 

@@ -1,5 +1,6 @@
 use std::io::Read;
 use byteorder::{LittleEndian, ReadBytesExt};
+use derive_debug::Dbg;
 use crate::{assert_section, read_primitive_vec, skip};
 use crate::decode::error::ParseError;
 use crate::decode::primitive::FOTString;
@@ -7,24 +8,27 @@ use crate::decode::stream::Stream;
 
 const HEADER: &str = "<saveh>\0";
 
-#[derive(Debug)]
+#[derive(Dbg)]
 pub struct Saveh {
     pub version: i8,
     pub strings: Vec<FOTString>,
     pub tmp: Vec<Test>,
+    #[dbg(placeholder = "...")]
     pub ints: Vec<u32>,
 }
 
-#[derive(Debug)]
+#[derive(Dbg)]
 pub struct Test {
     pub f1: i32,
     pub f2: i32,
     pub f4: Option<TestSub>,
+    #[dbg(formatter = "crate::decode::format::fmt_blob")]
     pub shit: Vec<u8>
 }
 
-#[derive(Debug)]
+#[derive(Dbg)]
 pub struct TestSub {
+    #[dbg(placeholder = "...")]
     pub shit: Vec<i32>,
     pub flag: u8,
 }

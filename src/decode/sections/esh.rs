@@ -2,8 +2,9 @@ use crate::decode::error::ParseError;
 use crate::decode::primitive::FOTString;
 use crate::decode::stream::Stream;
 use crate::{assert_section, skip};
-use byteorder::{LittleEndian, ReadBytesExt};
+use byteorder::{BigEndian, LittleEndian, ReadBytesExt};
 use std::io::Read;
+use derive_debug::Dbg;
 
 const ESH_HEADER: &str = "<esh>\0";
 
@@ -26,26 +27,26 @@ pub struct EshEntry {
     pub value: EshValue,
 }
 
-#[derive(Debug)]
+#[derive(Dbg)]
 pub enum EshValue {
     Bool(bool),
     Float(f32),
     I32(i32),
     String(FOTString),
-    Color([u32; 3]),
+    Color(#[dbg(placeholder = "...")] [u32; 3]),
     Team(FOTString),
 
     Sprite(FOTString),
     Type(FOTString),
 
-    Bin(Vec<u8>),
+    Bin(#[dbg(formatter = "crate::decode::format::fmt_blob")] Vec<u8>),
     Link { flags: u16, entity: u16 },
-    Frame(Vec<u8>),
+    Frame(#[dbg(formatter = "crate::decode::format::fmt_blob")] Vec<u8>),
     Rect([u32; 4]),
 
     ZoneName(FOTString),
 
-    Unknown(u32, Vec<u8>),
+    Unknown(u32, #[dbg(formatter = "crate::decode::format::fmt_blob")] Vec<u8>),
 }
 
 impl Esh {
@@ -76,7 +77,7 @@ impl Esh {
 
                     12 => {
                         let entity = data.read_u16::<LittleEndian>()?;
-                        let flags = data.read_u16::<LittleEndian>()?;
+                        let flags = data.read_u16::<BigEndian>()?;
                         EshValue::Link { flags, entity }
                     }
 
