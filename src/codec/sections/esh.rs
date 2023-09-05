@@ -1,10 +1,11 @@
-use crate::decode::error::ParseError;
-use crate::decode::primitive::FOTString;
-use crate::decode::stream::Stream;
-use crate::{assert_section, skip};
-use byteorder::{BigEndian, LittleEndian, ReadBytesExt};
-use std::io::Read;
+use crate::codec::error::ParseError;
+use crate::codec::primitive::FOTString;
+use crate::codec::stream::Stream;
+use crate::assert_section;
+use byteorder::{LittleEndian, ReadBytesExt};
 use derive_debug::Dbg;
+use std::io::Read;
+use crate::codec::Encodable;
 
 const ESH_HEADER: &str = "<esh>\0";
 
@@ -14,7 +15,7 @@ value_type
 3 = i32,
 4 = string?
 12 = bool
- */
+*/
 
 #[derive(Debug)]
 pub struct Esh {
@@ -34,19 +35,24 @@ pub enum EshValue {
     I32(i32),
     String(FOTString),
     Color(#[dbg(placeholder = "...")] [u32; 3]),
-    Team(FOTString),
 
     Sprite(FOTString),
     Type(FOTString),
 
-    Bin(#[dbg(formatter = "crate::decode::format::fmt_blob")] Vec<u8>),
-    Link { flags: u16, entity: u16 },
-    Frame(#[dbg(formatter = "crate::decode::format::fmt_blob")] Vec<u8>),
+    Bin(#[dbg(formatter = "crate::codec::format::fmt_blob")] Vec<u8>),
+    Link {
+        flags: u16,
+        entity: u16,
+    },
+    Frame([f32; 12]),
     Rect([u32; 4]),
 
     ZoneName(FOTString),
 
-    Unknown(u32, #[dbg(formatter = "crate::decode::format::fmt_blob")] Vec<u8>),
+    Unknown(
+        u32,
+        #[dbg(formatter = "crate::codec::format::fmt_blob")] Vec<u8>,
+    ),
 }
 
 impl Esh {
@@ -56,7 +62,7 @@ impl Esh {
 
         let values = (0..data.read_u32()?)
             .map(|_| -> Result<_, ParseError> {
-                let name = FOTString::read(&mut data)?;
+                let name = FOTString::parse(&mut data)?;
                 let t = data.read_u32()?;
 
                 let data_len = data.read_u32()? as usize;
@@ -77,11 +83,11 @@ impl Esh {
 
                     12 => {
                         let entity = data.read_u16::<LittleEndian>()?;
-                        let flags = data.read_u16::<BigEndian>()?;
+                        let flags = data.read_u16::<LittleEndian>()?;
                         EshValue::Link { flags, entity }
                     }
 
-                    13 => EshValue::Frame(data.read_slice(data_len)?.to_vec()),
+                    13 => EshValue::Frame(<_>::parse(data)?),
 
                     14 => EshValue::Rect([
                         data.read_u32()?,

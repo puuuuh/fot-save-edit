@@ -19,18 +19,19 @@ macro_rules! skip {
     }};
 }
 
-
 #[macro_export]
 macro_rules! read_primitive_vec {
-    ($data: ident, $t: ty, $len: expr) => {
-        {
-            let mut res: Vec<$t> = vec![0; $len as usize];
-            let b =
-                unsafe { core::slice::from_raw_parts_mut(res.as_mut_ptr() as *mut u8, ($len as usize) * std::mem::size_of::<$t>()) };
-            $data.read_exact(b)?;
-            res
-        }
-    };
+    ($data: ident, $t: ty, $len: expr) => {{
+        let mut res: Vec<$t> = vec![0; $len as usize];
+        let b = unsafe {
+            core::slice::from_raw_parts_mut(
+                res.as_mut_ptr() as *mut u8,
+                ($len as usize) * std::mem::size_of::<$t>(),
+            )
+        };
+        $data.read_exact(b)?;
+        res
+    }};
 }
 #[macro_export]
 macro_rules! dbg_str {

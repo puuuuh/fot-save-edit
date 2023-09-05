@@ -73,7 +73,7 @@ impl Save {
         for i in offsets.windows(2) {
             match World::decode(&raw, i[0], i[1] - i[0]) {
                 Ok(world) => worlds.push(world),
-                Err(e) => println!("world 0x{:x} decode error {}", i[0], e)
+                Err(e) => println!("world 0x{:x} codec error {}", i[0], e)
             };
         }
 
@@ -105,7 +105,7 @@ impl Save {
         {
             let enc = world.encode();
             let real_len = END - START;
-            println!("enc len {} real_len {}", enc.len(), real_len);
+            println!("codec len {} real_len {}", enc.len(), real_len);
             file.write(&enc)?;
             if (enc.len() < real_len) {
                 file.write(&vec![0; real_len - enc.len()])?;

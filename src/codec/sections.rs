@@ -6,3 +6,5 @@ pub mod world;
 pub mod world_zone;
 pub mod campaign_save;
 pub mod saveh;
+pub mod campaign;
+mod zar;

@@ -1,28 +1,31 @@
-use crate::decode::error::ParseError;
-use crate::decode::stream::Stream;
+use std::ffi::CStr;
+use crate::codec::error::ParseError;
+use crate::codec::stream::Stream;
 use crate::{assert_section};
-use std::io::{ErrorKind, Read};
+use std::io::{Error, Read, Write};
 use derive_debug::Dbg;
 use flate2::FlushDecompress;
-use crate::decode::primitive::FOTString;
-use crate::decode::sections::ssg::SSG;
-use crate::decode::sections::sgd::SDG;
+use crate::codec::Encodable;
+use crate::codec::primitive::FOTString;
+use crate::codec::sections::ssg::SSG;
+use crate::codec::sections::sgd::SDG;
 
 const HEADER: &str = "<world>\0";
 
 #[derive(Dbg)]
-pub struct World {
+pub struct World<'a> {
+    pub magic: &'a CStr,
     pub path: FOTString,
     pub sdg: SDG,
     pub ssg: SSG,
-    #[dbg(formatter = "crate::decode::format::fmt_blob")]
+    #[dbg(formatter = "crate::codec::format::fmt_blob")]
     pub tail: Vec<u8>,
 }
 
-impl World {
-    pub fn read(data: &mut Stream) -> Result<Self, ParseError> {
+impl<'a> Encodable<'a> for World<'a> {
+    fn parse(data: &mut Stream<'a>) -> Result<Self, ParseError> {
         assert_section!(data, HEADER);
-        data.read_cstr()?;
+        let magic = data.read_cstr()?;
 
         let uncompressed_length = data.read_u32()? as usize;
         data.read_u32()?; // second len
@@ -35,15 +38,20 @@ impl World {
         let world_data = result;
 
         let mut stream = Stream::new(&world_data);
-        let path = FOTString::read(&mut stream).unwrap(); // HEADER
-        let sdg = SDG::read(&mut stream).unwrap();
+        let path = FOTString::parse(&mut stream).unwrap(); // HEADER
+        let sdg = SDG::parse(&mut stream).unwrap();
         let ssg = SSG::read(&mut stream).unwrap();
 
         Ok(Self {
+            magic,
             path,
             sdg,
             ssg,
             tail: stream.read_slice(stream.len() - stream.pos())?.to_vec()
         })
+    }
+
+    fn write<T: Write>(&self, _stream: T) -> Result<(), Error> {
+        todo!()
     }
 }
