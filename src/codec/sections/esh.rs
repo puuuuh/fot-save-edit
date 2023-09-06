@@ -4,7 +4,7 @@ use crate::codec::stream::Stream;
 use crate::assert_section;
 use byteorder::{LittleEndian, ReadBytesExt};
 use derive_debug::Dbg;
-use std::io::Read;
+use std::io::{Error, Read, Write};
 use crate::codec::Encodable;
 
 const ESH_HEADER: &str = "<esh>\0";
@@ -55,8 +55,8 @@ pub enum EshValue {
     ),
 }
 
-impl Esh {
-    pub fn read(mut data: &mut Stream) -> Result<Self, ParseError> {
+impl<'a> Encodable<'a> for Esh {
+    fn parse(mut data: &mut Stream) -> Result<Self, ParseError> {
         assert_section!(data, ESH_HEADER);
         data.read_cstr()?;
 
@@ -68,17 +68,16 @@ impl Esh {
                 let data_len = data.read_u32()? as usize;
                 let value = match t {
                     1 => EshValue::Bool(data.read_i8()? != 0),
-                    2 => EshValue::Float(f32::from_bits(data.read_u32()?)),
-                    3 => EshValue::I32(data.read_i32()?),
-                    4 => EshValue::String(data.read_string()?),
-                    5 => EshValue::Color([data.read_u32()?, data.read_u32()?, data.read_u32()?]),
+                    2 => EshValue::Float(<_>::parse(data)?),
+                    3 => EshValue::I32(<_>::parse(data)?),
+                    4 => EshValue::String(<_>::parse(data)?),
+                    5 => EshValue::Color(<_>::parse(data)?),
 
-                    8 => EshValue::Sprite(data.read_string()?),
-                    9 => EshValue::Type(data.read_string()?),
+                    8 => EshValue::Sprite(<_>::parse(data)?),
+                    9 => EshValue::Type(<_>::parse(data)?),
 
                     11 => {
-                        let len = data.read_u32()?;
-                        EshValue::Bin(data.read_slice(len as _)?.to_vec())
+                        EshValue::Bin(<_>::parse(data)?)
                     }
 
                     12 => {
@@ -89,14 +88,9 @@ impl Esh {
 
                     13 => EshValue::Frame(<_>::parse(data)?),
 
-                    14 => EshValue::Rect([
-                        data.read_u32()?,
-                        data.read_u32()?,
-                        data.read_u32()?,
-                        data.read_u32()?,
-                    ]),
+                    14 => EshValue::Rect(<_>::parse(data)?),
 
-                    21 => EshValue::ZoneName(data.read_string()?),
+                    21 => EshValue::ZoneName(<_>::parse(data)?),
 
                     t => EshValue::Unknown(t, data.read_slice(data_len)?.to_vec()),
                 };
@@ -104,5 +98,9 @@ impl Esh {
             })
             .collect::<Result<Vec<_>, _>>()?;
         Ok(Self { values })
+    }
+
+    fn write<T: Write>(&self, _stream: T) -> Result<(), Error> {
+        todo!()
     }
 }

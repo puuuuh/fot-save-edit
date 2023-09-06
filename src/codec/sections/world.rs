@@ -40,7 +40,7 @@ impl<'a> Encodable<'a> for World<'a> {
         let mut stream = Stream::new(&world_data);
         let path = FOTString::parse(&mut stream).unwrap(); // HEADER
         let sdg = SDG::parse(&mut stream).unwrap();
-        let ssg = SSG::read(&mut stream).unwrap();
+        let ssg = SSG::parse(&mut stream).unwrap();
 
         Ok(Self {
             magic,

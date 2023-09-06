@@ -17,7 +17,7 @@ pub struct Zar {
     pub w: i32,
     pub data: Option<ZarSub>,
     #[dbg(formatter = "crate::codec::format::fmt_blob")]
-    pub shit: Vec<u8>
+    pub unknown: Vec<u8>
 }
 
 #[derive(Dbg)]
@@ -45,14 +45,14 @@ impl<'a> Encodable<'a> for Zar {
         } else {
             None
         };
-        let shit = <Vec<u8>>::parse(data)?;
+        let unknown = <Vec<u8>>::parse(data)?;
 
         Ok(Self {
             magic,
             h,
             w,
             data: opt,
-            shit
+            unknown
         })
 
     }

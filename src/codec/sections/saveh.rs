@@ -2,7 +2,7 @@ use std::ffi::CStr;
 use std::io::{Error, Read, Write};
 use byteorder::{ReadBytesExt};
 use derive_debug::Dbg;
-use crate::{assert_section, read_primitive_vec};
+use crate::{assert_section};
 use crate::codec::Encodable;
 use crate::codec::error::ParseError;
 use crate::codec::primitive::FOTString;
@@ -18,7 +18,7 @@ pub struct Saveh<'a> {
     pub strings: [FOTString; 5],
     pub tmp: [Zar; 8],
     #[dbg(placeholder = "...")]
-    pub ints: Vec<u32>,
+    pub ints: [u32; 6],
 }
 
 
@@ -34,9 +34,9 @@ impl<'a> Encodable<'a> for Saveh<'a> {
         Ok(Saveh {
             magic,
             version: some_ver,
-            strings: <[FOTString; 5]>::parse(data)?,
-            tmp: <[Zar; 8]>::parse(data)?,
-            ints: read_primitive_vec!(data, u32, 6)
+            strings: <_>::parse(data)?,
+            tmp: <_>::parse(data)?,
+            ints: <_>::parse(data)?
         })
     }
 

@@ -19,31 +19,33 @@ pub struct CampaignSave<'a> {
 pub struct CampaignFile<'a> {
     pub path: PathBuf,
     pub data: Stream<'a>
-    /*
-
-     */
 }
 
+impl<'a> Encodable<'a> for CampaignFile<'a> {
+    fn parse(data: &mut Stream<'a>) -> Result<Self, ParseError> {
+        let path = PathBuf::from(&*FOTString::parse(data)?);
+        let len = data.read_u32()?;
+        let data = data.substream(len as _)?;
+        Ok(CampaignFile {
+            path,
+            data,
+        })
+    }
 
+    fn write<T: Write>(&self, _stream: T) -> Result<(), Error> {
+        todo!()
+    }
+}
 
 impl<'a> Encodable<'a> for CampaignSave<'a> {
     fn parse(data: &mut Stream<'a>) -> Result<Self, ParseError> {
         assert_section!(data, HEADER);
         let magic = data.read_cstr()?;
-        let cnt = data.read_u32()?;
-        let mut res = vec![];
-        for _ in 0..cnt {
-            let path = PathBuf::from(&*FOTString::parse(data)?);
-            let len = data.read_u32()?;
-            let data = data.substream(len as _)?;
-            res.push(CampaignFile {
-                path,
-                data,
-            })
-        }
+
+        let files = <_>::parse(data)?;
         Ok(Self {
             magic,
-            files: res,
+            files,
         })
     }
 
