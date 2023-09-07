@@ -1,16 +1,19 @@
-use std::io::{Error, Write};
-use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use crate::codec::error::ParseError;
 use crate::codec::stream::Stream;
+use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
+use std::io::{Error, Write};
 
 pub mod error;
+pub mod format;
 pub mod primitive;
+pub mod sections;
 pub mod shared;
 pub mod stream;
-pub mod sections;
-pub mod format;
 
-pub trait Encodable<'a> where Self: Sized {
+pub trait Encodable<'a>
+where
+    Self: Sized,
+{
     fn parse(data: &mut Stream<'a>) -> Result<Self, ParseError>;
     fn write<T: Write>(&self, stream: T) -> Result<(), Error>;
 }
@@ -55,7 +58,10 @@ impl<'a> Encodable<'a> for f32 {
     }
 }
 
-impl<'a, T> Encodable<'a> for Vec<T> where T: Encodable<'a> {
+impl<'a, T> Encodable<'a> for Vec<T>
+where
+    T: Encodable<'a>,
+{
     fn parse(data: &mut Stream<'a>) -> Result<Self, ParseError> {
         let len = data.read_u32()?;
         let mut res = Vec::with_capacity(len as _);

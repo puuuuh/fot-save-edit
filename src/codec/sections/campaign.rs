@@ -1,10 +1,10 @@
-use std::io::{Error, Write, Read};
-use derive_debug::Dbg;
 use crate::assert_section;
-use crate::codec::Encodable;
 use crate::codec::error::ParseError;
 use crate::codec::primitive::FOTString;
 use crate::codec::stream::Stream;
+use crate::codec::Encodable;
+use derive_debug::Dbg;
+use std::io::{Error, Read, Write};
 
 const HEADER: &str = "<campaign>\0";
 
@@ -23,10 +23,7 @@ impl<'a> Encodable<'a> for Campaign<'a> {
         data.skip(0x22BA)?;
         let world_file = data.read_string()?;
         data.remain();
-        Ok(Self {
-            raw: d,
-            world_file
-        })
+        Ok(Self { raw: d, world_file })
     }
 
     fn write<T: Write>(&self, mut stream: T) -> Result<(), Error> {

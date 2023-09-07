@@ -1,12 +1,12 @@
-use std::ffi::CString;
-use std::io::{Error, Write};
-use byteorder::ReadBytesExt;
-use derive_debug::Dbg;
 use crate::assert_section;
-use crate::codec::Encodable;
 use crate::codec::error::ParseError;
 use crate::codec::stream::Stream;
+use crate::codec::Encodable;
+use byteorder::ReadBytesExt;
+use derive_debug::Dbg;
+use std::ffi::CString;
 use std::io::Read;
+use std::io::{Error, Write};
 
 const HEADER: &str = "<zar>\0";
 
@@ -17,7 +17,7 @@ pub struct Zar {
     pub w: i32,
     pub data: Option<ZarSub>,
     #[dbg(formatter = "crate::codec::format::fmt_blob")]
-    pub unknown: Vec<u8>
+    pub unknown: Vec<u8>,
 }
 
 #[derive(Dbg)]
@@ -38,10 +38,7 @@ impl<'a> Encodable<'a> for Zar {
         let opt = if flag != 0 {
             let img = <Vec<i32>>::parse(data)?;
             let flag = data.read_u8()?;
-            Some(ZarSub {
-                img,
-                flag,
-            })
+            Some(ZarSub { img, flag })
         } else {
             None
         };
@@ -52,9 +49,8 @@ impl<'a> Encodable<'a> for Zar {
             h,
             w,
             data: opt,
-            unknown
+            unknown,
         })
-
     }
 
     fn write<T: Write>(&self, _stream: T) -> Result<(), Error> {

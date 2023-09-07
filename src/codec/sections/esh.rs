@@ -49,7 +49,7 @@ pub enum EshValue {
     ),
 }
 
-impl <'a> Encodable<'a> for EshValue {
+impl<'a> Encodable<'a> for EshValue {
     fn parse(data: &mut Stream<'a>) -> Result<Self, ParseError> {
         let t = data.read_u32()?;
         let data_len = data.read_u32()? as usize;
@@ -171,14 +171,12 @@ impl<'a> Encodable<'a> for EshEntry {
 }
 
 impl<'a> Encodable<'a> for Esh {
-    fn parse(mut data: &mut Stream) -> Result<Self, ParseError> {
+    fn parse(data: &mut Stream) -> Result<Self, ParseError> {
         assert_section!(data, HEADER);
         let magic = data.read_cstr()?.to_owned();
 
         let values = (0..data.read_u32()?)
-            .map(|_| -> Result<_, ParseError> {
-                EshEntry::parse(data)
-            })
+            .map(|_| -> Result<_, ParseError> { EshEntry::parse(data) })
             .collect::<Result<Vec<_>, _>>()?;
         Ok(Self { magic, values })
     }
@@ -188,6 +186,5 @@ impl<'a> Encodable<'a> for Esh {
         stream.write_all(self.magic.to_bytes_with_nul())?;
         self.values.write(stream)?;
         Ok(())
-
     }
 }

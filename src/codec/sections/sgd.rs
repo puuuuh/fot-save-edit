@@ -1,10 +1,10 @@
-use std::ffi::CString;
-use std::io::{Error, Read, Write};
-use crate::{assert_section};
-use crate::codec::Encodable;
+use crate::assert_section;
 use crate::codec::error::ParseError;
 use crate::codec::primitive::FOTString;
 use crate::codec::stream::Stream;
+use crate::codec::Encodable;
+use std::ffi::CString;
+use std::io::{Error, Read, Write};
 
 const HEADER: &str = "<sgd>\0";
 
@@ -16,8 +16,6 @@ pub struct SDG {
     pub replicas: Vec<Vec<FOTString>>,
 }
 
-
-
 impl<'a> Encodable<'a> for SDG {
     fn parse(data: &mut Stream<'a>) -> Result<Self, ParseError> {
         assert_section!(data, HEADER);
@@ -27,7 +25,12 @@ impl<'a> Encodable<'a> for SDG {
         let names = <Vec<FOTString>>::parse(data)?;
         let replicas = <Vec<Vec<FOTString>>>::parse(data)?;
 
-        Ok(Self { magic, unknown, names, replicas })
+        Ok(Self {
+            magic,
+            unknown,
+            names,
+            replicas,
+        })
     }
 
     fn write<T: Write>(&self, mut stream: T) -> Result<(), Error> {

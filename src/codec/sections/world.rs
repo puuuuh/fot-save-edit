@@ -1,15 +1,15 @@
-use std::ffi::CStr;
+use crate::assert_section;
 use crate::codec::error::ParseError;
+use crate::codec::primitive::FOTString;
+use crate::codec::sections::sgd::SDG;
+use crate::codec::sections::ssg::SSG;
 use crate::codec::stream::Stream;
-use crate::{assert_section};
-use std::io::{Error, Read, Write};
+use crate::codec::Encodable;
 use byteorder::{LittleEndian, WriteBytesExt};
 use derive_debug::Dbg;
 use flate2::{Compression, FlushCompress, FlushDecompress};
-use crate::codec::Encodable;
-use crate::codec::primitive::FOTString;
-use crate::codec::sections::ssg::SSG;
-use crate::codec::sections::sgd::SDG;
+use std::ffi::CStr;
+use std::io::{Error, Read, Write};
 
 const HEADER: &str = "<world>\0";
 
@@ -33,7 +33,13 @@ impl<'a> Encodable<'a> for World<'a> {
 
         let mut result = vec![0; uncompressed_length];
         let mut decomp = flate2::Decompress::new(true);
-        decomp.decompress(data.clone().read_slice(data.len() - data.pos())?, &mut result, FlushDecompress::Finish).unwrap();
+        decomp
+            .decompress(
+                data.clone().read_slice(data.len() - data.pos())?,
+                &mut result,
+                FlushDecompress::Finish,
+            )
+            .unwrap();
         data.skip(decomp.total_in() as _)?;
 
         let world_data = result;
@@ -48,7 +54,7 @@ impl<'a> Encodable<'a> for World<'a> {
             path,
             sdg,
             ssg,
-            tail: stream.read_slice(stream.len() - stream.pos())?.to_vec()
+            tail: stream.read_slice(stream.len() - stream.pos())?.to_vec(),
         })
     }
 
@@ -60,7 +66,8 @@ impl<'a> Encodable<'a> for World<'a> {
         world_data.extend_from_slice(&self.tail);
         let mut result = Vec::with_capacity(world_data.len());
         let mut comp = flate2::Compress::new(Compression::best(), true);
-        comp.compress_vec(&world_data, &mut result, FlushCompress::Finish).unwrap();
+        comp.compress_vec(&world_data, &mut result, FlushCompress::Finish)
+            .unwrap();
 
         stream.write_all(HEADER.as_bytes())?;
         stream.write_all(self.magic.to_bytes_with_nul())?;

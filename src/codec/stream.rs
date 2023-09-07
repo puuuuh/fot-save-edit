@@ -1,9 +1,9 @@
 use crate::codec::error::ParseError;
 use crate::codec::primitive::FOTString;
+use crate::codec::Encodable;
 use byteorder::{LittleEndian, ReadBytesExt};
 use std::ffi::CStr;
 use std::io::{ErrorKind, Read};
-use crate::codec::Encodable;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Stream<'a> {
@@ -46,7 +46,7 @@ impl<'a> Stream<'a> {
         FOTString::parse(self)
     }
 
-    pub  fn read_slice<'b>(&mut self, cnt: usize) -> Result<&'b [u8], ParseError>
+    pub fn read_slice<'b>(&mut self, cnt: usize) -> Result<&'b [u8], ParseError>
     where
         'a: 'b,
     {
@@ -55,20 +55,12 @@ impl<'a> Stream<'a> {
         Ok(s)
     }
 
-    pub fn read_cstr(&mut self) -> Result<&'a CStr, ParseError>
-    {
+    pub fn read_cstr(&mut self) -> Result<&'a CStr, ParseError> {
         let s = CStr::from_bytes_until_nul(self.cursor)
             .map_err(|e| std::io::Error::new(ErrorKind::InvalidData, e))?;
 
         self.cursor = &self.cursor[s.to_bytes_with_nul().len()..];
         Ok(s)
-    }
-
-    pub fn substream<'b>(&mut self, len: usize) -> Result<Stream<'b>, ParseError>
-        where
-            'a: 'b,
-    {
-        Ok(Stream::new(self.read_slice(len)?))
     }
 }
 

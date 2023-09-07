@@ -1,10 +1,10 @@
-use std::io::Write;
 use crate::codec::error::ParseError;
 use crate::codec::stream::Stream;
+use crate::codec::Encodable;
 use byteorder::{LittleEndian, WriteBytesExt};
 use encoding_rs::{UTF_16LE, WINDOWS_1251};
+use std::io::Write;
 use std::ops::{Deref, Shr};
-use crate::codec::Encodable;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum FOTString {
@@ -18,15 +18,9 @@ impl Deref for FOTString {
 
     fn deref(&self) -> &Self::Target {
         match self {
-            FOTString::Ascii(ref data) => {
-                data
-            }
-            FOTString::Win1251(ref data) => {
-                data
-            }
-            FOTString::Utf16(ref data) => {
-                data
-            }
+            FOTString::Ascii(ref data) => data,
+            FOTString::Win1251(ref data) => data,
+            FOTString::Utf16(ref data) => data,
         }
     }
 }
@@ -34,12 +28,8 @@ impl Deref for FOTString {
 impl FOTString {
     pub fn serialized_length(&self) -> usize {
         (match self {
-            FOTString::Ascii(data) => {
-                data.len()
-            }
-            FOTString::Utf16(data) | FOTString::Win1251(data) => {
-                data.len() * 2
-            }
+            FOTString::Ascii(data) => data.len(),
+            FOTString::Utf16(data) | FOTString::Win1251(data) => data.len() * 2,
         }) + 4
     }
 }

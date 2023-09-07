@@ -1,8 +1,8 @@
+use crate::assert_section;
 use crate::codec::error::ParseError;
 use crate::codec::stream::Stream;
-use crate::{assert_section};
-use std::io::{Error, Read, Write};
 use crate::codec::Encodable;
+use std::io::{Error, Read, Write};
 
 const HEADER: &str = "<world_zone>\0";
 

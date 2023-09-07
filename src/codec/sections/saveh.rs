@@ -1,13 +1,13 @@
-use std::ffi::CStr;
-use std::io::{Error, Read, Write};
-use byteorder::{ReadBytesExt, WriteBytesExt};
-use derive_debug::Dbg;
-use crate::{assert_section};
-use crate::codec::Encodable;
+use crate::assert_section;
 use crate::codec::error::ParseError;
 use crate::codec::primitive::FOTString;
 use crate::codec::sections::zar::Zar;
 use crate::codec::stream::Stream;
+use crate::codec::Encodable;
+use byteorder::{ReadBytesExt, WriteBytesExt};
+use derive_debug::Dbg;
+use std::ffi::CStr;
+use std::io::{Error, Read, Write};
 
 const HEADER: &str = "<saveh>\0";
 
@@ -32,7 +32,7 @@ impl<'a> Encodable<'a> for Saveh<'a> {
             version: some_ver,
             strings: <_>::parse(data)?,
             tmp: <_>::parse(data)?,
-            ints: <_>::parse(data)?
+            ints: <_>::parse(data)?,
         })
     }
 

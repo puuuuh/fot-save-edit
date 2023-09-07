@@ -1,11 +1,11 @@
-use std::io::{Error, Read, Write};
-use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
-use crate::{assert_section, skip};
-use crate::codec::Encodable;
+use crate::assert_section;
 use crate::codec::error::ParseError;
 use crate::codec::sections::entity_file::EntityFile;
 use crate::codec::sections::esh::Esh;
 use crate::codec::stream::Stream;
+use crate::codec::Encodable;
+use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
+use std::io::{Error, Read, Write};
 
 const HEADER: &str = "<SSG>\0";
 
@@ -33,11 +33,7 @@ impl<'a> Encodable<'a> for SSGEntry {
         } else {
             None
         };
-        Ok(SSGEntry {
-            id,
-            flag,
-            data
-        })
+        Ok(SSGEntry { id, flag, data })
     }
 
     fn write<T: Write>(&self, mut stream: T) -> Result<(), Error> {
@@ -61,16 +57,18 @@ impl<'a> Encodable<'a> for SSG {
 
         let esh_count = data.read_i16::<LittleEndian>()?;
         let unknown1 = data.read_u32()?;
-        let entries = (0..esh_count - 1).map(|_| -> Result<_, ParseError> {
-            let res = SSGEntry::parse(data);
-            res
-        }).collect::<Result<_, _>>()?;
+        let entries = (0..esh_count - 1)
+            .map(|_| -> Result<_, ParseError> {
+                let res = SSGEntry::parse(data);
+                res
+            })
+            .collect::<Result<_, _>>()?;
 
         Ok(Self {
             unknown,
             unknown1,
             entity_file,
-            values: entries
+            values: entries,
         })
     }
 

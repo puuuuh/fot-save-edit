@@ -1,10 +1,10 @@
-use std::ffi::CString;
-use std::io::{Error, Read, Write};
-use crate::{assert_section};
-use crate::codec::Encodable;
+use crate::assert_section;
 use crate::codec::error::ParseError;
 use crate::codec::primitive::FOTString;
 use crate::codec::stream::Stream;
+use crate::codec::Encodable;
+use std::ffi::CString;
+use std::io::{Error, Read, Write};
 
 const HEADER: &str = "<entity_file>\0";
 

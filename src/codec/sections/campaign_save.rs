@@ -1,12 +1,11 @@
-use std::ffi::{CStr};
-use std::io::{Error, Read, Write};
-use std::path::{PathBuf};
-use byteorder::{LittleEndian, WriteBytesExt};
-use crate::{assert_section};
-use crate::codec::Encodable;
+use crate::assert_section;
 use crate::codec::error::ParseError;
 use crate::codec::primitive::FOTString;
 use crate::codec::stream::Stream;
+use crate::codec::Encodable;
+use byteorder::{LittleEndian, WriteBytesExt};
+use std::ffi::CStr;
+use std::io::{Error, Read, Write};
 
 const HEADER: &str = "<campaign_save>\0";
 
@@ -27,10 +26,7 @@ impl<'a> Encodable<'a> for CampaignFile {
         let path = FOTString::parse(data)?;
         let len = data.read_u32()?;
         let data = data.read_slice(len as _)?.to_vec();
-        Ok(CampaignFile {
-            path,
-            data,
-        })
+        Ok(CampaignFile { path, data })
     }
 
     fn write<T: Write>(&self, mut stream: T) -> Result<(), Error> {
@@ -47,10 +43,7 @@ impl<'a> Encodable<'a> for CampaignSave<'a> {
         let magic = data.read_cstr()?;
 
         let files = <_>::parse(data)?;
-        Ok(Self {
-            magic,
-            files,
-        })
+        Ok(Self { magic, files })
     }
 
     fn write<T: Write>(&self, mut stream: T) -> Result<(), Error> {
