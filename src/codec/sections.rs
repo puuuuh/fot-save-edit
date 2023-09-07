@@ -7,4 +7,4 @@ pub mod sgd;
 pub mod ssg;
 pub mod world;
 pub mod world_zone;
-mod zar;
+pub mod zar;

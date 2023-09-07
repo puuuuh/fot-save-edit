@@ -11,13 +11,6 @@ macro_rules! assert_section {
         }
     };
 }
-#[macro_export]
-macro_rules! skip {
-    ($data: ident, $s: literal) => {{
-        let mut skip_buf = [0; $s];
-        $data.read_exact(&mut skip_buf)?;
-    }};
-}
 
 #[macro_export]
 macro_rules! read_primitive_vec {
@@ -31,13 +24,5 @@ macro_rules! read_primitive_vec {
         };
         $data.read_exact(b)?;
         res
-    }};
-}
-#[macro_export]
-macro_rules! dbg_str {
-    ($data: ident, $s: expr) => {{
-        let mut buf = vec![0; $s as usize];
-        $data.read_exact(&mut buf);
-        dbg!(String::from_utf8_lossy(&buf))
     }};
 }

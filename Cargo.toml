@@ -1,5 +1,5 @@
 [package]
-name = "fot-save-edit"
+name = "fot_codec"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,11 +7,8 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.75"
-deflate = "1.0.0"
-flate2 = "1.0.27"
-memmem = { version = "0.1.1" }
+flate2 = { git = "https://github.com/rust-lang/flate2-rs.git", rev = "f285e9abac98aa4f0a15d2e79993a261f166056c" }
 byteorder = { version = "1.4.3" }
-widestring = "1.0.2"
 thiserror = "1.0.39"
 derive-debug = "0.1.2"
 encoding_rs = "0.8.33"
