@@ -31,6 +31,19 @@ impl Deref for FOTString {
     }
 }
 
+impl FOTString {
+    pub fn serialized_length(&self) -> usize {
+        (match self {
+            FOTString::Ascii(data) => {
+                data.len()
+            }
+            FOTString::Utf16(data) | FOTString::Win1251(data) => {
+                data.len() * 2
+            }
+        }) + 4
+    }
+}
+
 impl<'a> Encodable<'a> for FOTString {
     fn parse(data: &mut Stream<'a>) -> Result<Self, ParseError> {
         let header = data.read_u32()?;
@@ -66,14 +79,14 @@ impl<'a> Encodable<'a> for FOTString {
             }
             FOTString::Win1251(data) => {
                 let (data, _, _err) = WINDOWS_1251.encode(data);
-                stream.write_u32::<LittleEndian>(data.len() as u32)?;
+                stream.write_u32::<LittleEndian>(data.len() as u32 | 1u32 << 31)?;
                 for v in &*data {
                     stream.write_all(&[*v, 0])?;
                 }
             }
             FOTString::Utf16(data) => {
                 let (data, _, _err) = UTF_16LE.encode(data);
-                stream.write_u32::<LittleEndian>((data.len() / 2) as u32)?;
+                stream.write_u32::<LittleEndian>((data.len() / 2) as u32 | 1u32 << 31)?;
                 stream.write_all(&data)?;
             }
         };

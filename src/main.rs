@@ -7,9 +7,12 @@ mod files;
 
 use std::env;
 use std::fs;
+use std::path::Path;
 use crate::codec::Encodable;
 use crate::codec::sections::campaign_save::CampaignSave;
 use crate::codec::sections::saveh::Saveh;
+use crate::codec::sections::world::World;
+use crate::codec::stream::Stream;
 
 fn main() {
     let args: Vec<_> = env::args().collect();
@@ -21,14 +24,14 @@ fn main() {
     let mut cursor = codec::stream::Stream::new(cursor);
     let _svh = Saveh::parse(&mut cursor).unwrap();
     for w in &CampaignSave::parse(&mut cursor).unwrap().files {
-        let mut t = w.data.clone();
-        fs::write(w.path.file_name().unwrap(), t.read_slice(t.len()).unwrap()).unwrap();
-        match &*w.path.extension().unwrap_or_default().to_string_lossy() {
+        let path  = Path::new(&*w.path);
+        fs::write(path.file_name().unwrap(), &w.data).unwrap();
+        match &*path.extension().unwrap_or_default().to_string_lossy() {
             "cam" => {
-                files::cam::Cam::parse(&mut w.data.clone());
+                dbg!(files::cam::Cam::parse(&mut Stream::new(&w.data)).unwrap());
             }
             "sav" => {
-                files::sav::Sav::parse(&mut w.data.clone());
+                files::sav::Sav::parse(&mut Stream::new(&w.data)).unwrap();
             }
             _ => {
                 todo!()

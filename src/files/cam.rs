@@ -17,6 +17,6 @@ impl<'a> Encodable<'a> for Cam<'a> {
     }
 
     fn write<T: Write>(&self, _stream: T) -> Result<(), Error> {
-        todo!()
+        self.campaign.write(_stream)
     }
 }

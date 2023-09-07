@@ -22,7 +22,9 @@ impl<'a> Encodable<'a> for Sav<'a> {
         })
     }
 
-    fn write<T: Write>(&self, _stream: T) -> Result<(), Error> {
-        todo!()
+    fn write<T: Write>(&self, mut stream: T) -> Result<(), Error> {
+        self.saveh.write(&mut stream)?;
+        self.world.write(&mut stream)?;
+        Ok(())
     }
 }

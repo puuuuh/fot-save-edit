@@ -79,7 +79,10 @@ impl<'a, T: Encodable<'a>, const N: usize> Encodable<'a> for [T; N] {
         std::array::try_from_fn(|_| T::parse(data))
     }
 
-    fn write<T1: Write>(&self, _stream: T1) -> Result<(), Error> {
-        todo!()
+    fn write<T1: Write>(&self, mut stream: T1) -> Result<(), Error> {
+        for i in self {
+            i.write(&mut stream)?
+        }
+        Ok(())
     }
 }

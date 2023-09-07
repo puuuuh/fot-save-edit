@@ -1,6 +1,6 @@
 use std::ffi::CStr;
 use std::io::{Error, Read, Write};
-use byteorder::{ReadBytesExt};
+use byteorder::{ReadBytesExt, WriteBytesExt};
 use derive_debug::Dbg;
 use crate::{assert_section};
 use crate::codec::Encodable;
@@ -21,10 +21,6 @@ pub struct Saveh<'a> {
     pub ints: [u32; 6],
 }
 
-
-
-
-
 impl<'a> Encodable<'a> for Saveh<'a> {
     fn parse(data: &mut Stream<'a>) -> Result<Saveh<'a>, ParseError> {
         assert_section!(data, HEADER);
@@ -40,7 +36,13 @@ impl<'a> Encodable<'a> for Saveh<'a> {
         })
     }
 
-    fn write<T: Write>(&self, _stream: T) -> Result<(), Error> {
-        todo!()
+    fn write<T: Write>(&self, mut stream: T) -> Result<(), Error> {
+        stream.write_all(HEADER.as_bytes())?;
+        stream.write_all(self.magic.to_bytes_with_nul())?;
+        stream.write_i8(self.version)?;
+        self.strings.write(&mut stream)?;
+        self.tmp.write(&mut stream)?;
+        self.ints.write(&mut stream)?;
+        Ok(())
     }
 }

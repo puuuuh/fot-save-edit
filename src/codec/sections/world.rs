@@ -3,8 +3,9 @@ use crate::codec::error::ParseError;
 use crate::codec::stream::Stream;
 use crate::{assert_section};
 use std::io::{Error, Read, Write};
+use byteorder::{LittleEndian, WriteBytesExt};
 use derive_debug::Dbg;
-use flate2::FlushDecompress;
+use flate2::{Compression, FlushCompress, FlushDecompress};
 use crate::codec::Encodable;
 use crate::codec::primitive::FOTString;
 use crate::codec::sections::ssg::SSG;
@@ -38,9 +39,9 @@ impl<'a> Encodable<'a> for World<'a> {
         let world_data = result;
 
         let mut stream = Stream::new(&world_data);
-        let path = FOTString::parse(&mut stream).unwrap(); // HEADER
-        let sdg = SDG::parse(&mut stream).unwrap();
-        let ssg = SSG::parse(&mut stream).unwrap();
+        let path = FOTString::parse(&mut stream)?; // HEADER
+        let sdg = SDG::parse(&mut stream)?;
+        let ssg = SSG::parse(&mut stream)?;
 
         Ok(Self {
             magic,
@@ -51,7 +52,21 @@ impl<'a> Encodable<'a> for World<'a> {
         })
     }
 
-    fn write<T: Write>(&self, _stream: T) -> Result<(), Error> {
-        todo!()
+    fn write<T: Write>(&self, mut stream: T) -> Result<(), Error> {
+        let mut world_data = Vec::new();
+        self.path.write(&mut world_data)?;
+        self.sdg.write(&mut world_data)?;
+        self.ssg.write(&mut world_data)?;
+        world_data.extend_from_slice(&self.tail);
+        let mut result = Vec::with_capacity(world_data.len());
+        let mut comp = flate2::Compress::new(Compression::best(), true);
+        comp.compress_vec(&world_data, &mut result, FlushCompress::Finish).unwrap();
+
+        stream.write_all(HEADER.as_bytes())?;
+        stream.write_all(self.magic.to_bytes_with_nul())?;
+        stream.write_u32::<LittleEndian>(world_data.len() as _)?;
+        stream.write_u32::<LittleEndian>(world_data.len() as _)?;
+        stream.write_all(&result)?;
+        Ok(())
     }
 }
